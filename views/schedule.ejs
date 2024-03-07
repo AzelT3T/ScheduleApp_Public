@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f8f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .count-cell {
+            background-color: #648d68;
+        }
+
+        #weekday-buttons {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .weekday-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .weekday-btn:hover {
+            background-color: #367c39;
+            transform: translateY(-2px);
+        }
+
+        .weekday-btn.active {
+            background-color: #286227;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 90%;
+            margin-top: 20px;
+            margin-bottom: 0px;
+            /* Remove space below the table */
+        }
+
+
+        td.hasSubject,
+        td.merged::before {
+            background-color: grey;
+            background-repeat: no-repeat;
+            background-size: 4px 100%;
+            background-position: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        td.merged {
+            background-color: #e1e1e1;
+        }
+
+        th,
+        td {
+            border: 1.5px solid #000000;
+            padding: 8px;
+            text-align: center;
+            width: 60px;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            margin: 20px 0;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        #tbody-1 td {
+            background-color: #fbeddc;
+            /* 薄いオレンジ色 */
+        }
+
+        td.hasSubject {
+            background-color: #e9e9e9;
+            font-size: 10px
+        }
+
+        #tbody-1 td.hasSubject {
+            background-color: #e9e9e9;
+        }
+
+        /* Extra style for the header table to remove margin below it */
+        #header-table {
+            margin-bottom: 0;
+        }
+
+        /* Ensure that there's no margin above the tbody tables */
+        #table1,
+        #table2 {
+            margin-top: 0;
+        }
+
+        #controls-container {
+            display: flex;
+            justify-content: center;
+            /* 中央揃え */
+            align-items: center;
+            /* アイテムを垂直方向の中心に配置 */
+            gap: 10px;
+            /* ボタンとリンクの間隔 */
+            flex-wrap: wrap;
+            /* 必要に応じて折り返し */
+            margin: 20px 0;
+            /* 上下のマージン */
+        }
+
+        @media only screen and (min-width: 820px) and (max-width: 1180px) and (orientation: portrait) {
+            table {
+                width: 100%;
+                font-size: 10px;
+            }
+
+            th,
+            td {
+                padding: 4px;
+                width: auto;
+            }
+
+            select {
+                padding: 6px;
+                font-size: 16px;
+            }
+        }
+
+        /* iPad (768×1024) 横向き */
+        @media only screen and (min-width: 820px) and (max-width: 1180px) and (orientation: landscape) {
+            table {
+                width: 100%;
+                font-size: 11px;
+            }
+
+            th,
+            td {
+                padding: 5px;
+                width: auto;
+            }
+
+            select {
+                padding: 7px;
+                font-size: 18px;
+            }
+        }
+
+        @media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+            table {
+                width: 100%;
+                font-size: 10px;
+            }
+
+            th,
+            td {
+                padding: 4px;
+                width: auto;
+            }
+
+            select {
+                padding: 6px;
+                font-size: 16px;
+            }
+        }
+
+        /* iPad (768×1024) 横向き */
+        @media only screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+            table {
+                width: 100%;
+                font-size: 11px;
+            }
+
+            th,
+            td {
+                padding: 5px;
+                width: auto;
+            }
+
+            select {
+                padding: 7px;
+                font-size: 18px;
+            }
+        }
+
+        /* iPad (1536×2048) */
+        @media only screen and (min-width: 1536px) and (max-width: 2048px) {
+            table {
+                width: 100%;
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 6px;
+                width: auto;
+            }
+
+            select {
+                padding: 8px;
+                font-size: 18px;
+            }
+        }
+
+        /* iPad (1620×2160) */
+        @media only screen and (min-width: 1620px) and (max-width: 2160px) {
+            table {
+                width: 100%;
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 7px;
+                width: auto;
+            }
+
+            select {
+                padding: 9px;
+                font-size: 19px;
+            }
+        }
+
+        /* iPad (1640×2360) 縦向き */
+        @media only screen and (min-width: 1640px) and (max-width: 2360px) and (orientation: portrait) {
+            table {
+                width: 100%;
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                padding: 7px;
+                width: auto;
+            }
+
+            select {
+                padding: 9px;
+                font-size: 19px;
+            }
+        }
+
+        /* iPad (1640×2360) 横向き */
+        @media only screen and (min-width: 1640px) and (max-width: 2360px) and (orientation: landscape) {
+            table {
+                width: 100%;
+                font-size: 14px;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                width: auto;
+            }
+
+            select {
+                padding: 10px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="controls-container">
+        <div id="weekday-buttons">
+            <button class="weekday-btn" data-weekday="月">月</button>
+            <button class="weekday-btn" data-weekday="火">火</button>
+            <button class="weekday-btn" data-weekday="木">木</button>
+            <button class="weekday-btn" data-weekday="金">金</button>
+        </div>
+        <a href="/top" class="button">top画面へ戻る</a>
+        <a href="/management" class="button">生徒一覧へ戻る</a>
+    </div>
+    <!-- ヘッダー部分 -->
+    <table id="header-table">
+        <thead>
+            <tr id="header-row-1">
+            </tr>
+        </thead>
+        <tbody id="tbody-1">
+        </tbody>
+        <tbody id="tbody-2">
+        </tbody>
+    </table>
+    <script>
+        const scheduleData = <%- JSON.stringify(scheduleData) %>;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            createHeader("header-row-1");
+            createHeaderCountRow(document.getElementById('header-table'));
+
+            // 曜日のインデックスを取得
+            const today = new Date();
+            const dayIndex = today.getDay();
+
+            // 曜日とそのインデックスのマッピング
+            const dayMappings = { 1: "月", 2: "火", 4: "木", 5: "金" };
+            let todayWeekday = dayMappings[dayIndex];
+
+            // 今日の曜日が月、火、木、金以外の場合は、"月"を設定
+            if (!todayWeekday) {
+                todayWeekday = "月";
+            }
+
+            const buttons = document.querySelectorAll('.weekday-btn');
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    buttons.forEach(btn => btn.classList.remove("active")); // 他のボタンのアクティブ状態を解除
+                    this.classList.add("active"); // クリックされたボタンをアクティブにする
+
+                    const selectedWeekday = this.dataset.weekday; // クリックされたボタンの曜日を取得
+                    resetCounts();
+                    resetCountCellsToInitialValue();
+                    groupAndDisplayData(selectedWeekday); // 選択された曜日を基にデータをフィルタリング
+                    syncColumnWidths('header-row-1', 'tbody-1', 'tbody-2');
+                });
+            });
+
+            // 今日に該当するボタン、または月曜日に該当するボタンを自動クリック
+            const activeButton = Array.from(buttons).find(button => button.dataset.weekday === todayWeekday);
+            if (activeButton) {
+                activeButton.click();
+            } else {
+                // 万が一対応するボタンが見つからない場合は、最初のボタンをクリック
+                buttons[0].click();
+            }
+        });
+
+        function syncColumnWidths(headerRowId, ...bodyRowIds) {
+            const headerRow = document.getElementById(headerRowId);
+            const headerWidths = Array.from(headerRow.children).map(th => th.clientWidth);
+
+            bodyRowIds.forEach(rowId => {
+                const bodyRows = document.getElementById(rowId).children;
+                Array.from(bodyRows).forEach(bodyRow => {
+                    Array.from(bodyRow.children).forEach((td, index) => {
+                        if (headerWidths[index] !== undefined) {
+                            td.style.width = `${headerWidths[index]}px`;
+                        }
+                    });
+                });
+            });
+        }
+
+        function resetCounts() {
+            for (let i = 0; i < scheduleCounts.length; i++) {
+                scheduleCounts[i] = 0;
+            }
+        }
+
+        function resetCountCellsToInitialValue() {
+            const headerCounts = document.querySelectorAll('.count-cell');
+            headerCounts.forEach((th, index) => {
+                th.textContent = "0人";
+            });
+        }
+
+        function createHeaderCountRow(headerTable) {
+            const tr = document.createElement('tr');
+            for (let i = 0; i < 29; i++) {
+                const th = document.createElement('th');
+                th.textContent = '0人';
+                th.classList.add('count-cell');
+                tr.appendChild(th);
+            }
+            headerTable.querySelector('thead').insertBefore(tr, headerTable.querySelector('thead').firstChild);
+        }
+
+        const scheduleCounts = Array(30).fill(0);
+
+        function updateHeaderCounts() {
+            console.log("update");
+            const headerCounts = document.querySelectorAll('.count-cell');
+            headerCounts.forEach((th, index) => {
+                th.textContent = scheduleCounts[index] + "人";
+            });
+        }
+        function createHeader(headerRowId) {
+            const headerRow = document.getElementById(headerRowId);
+            for (let hour = 14; hour <= 21; hour++) {
+                for (let minute = 0; minute < 60; minute += 15) {
+                    const timeString = String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+                    const th = document.createElement('th');
+                    th.textContent = timeString;
+                    headerRow.appendChild(th);
+                    if (hour === 21 && minute === 0) {
+                        break;
+                    }
+                }
+            }
+            headerRow.parentElement.parentElement.style.tableLayout = "fixed";
+        }
+
+        function groupAndDisplayData(selectedWeekday) {
+            const filteredData = scheduleData.map(personData => {
+                const filteredSchedules = personData.schedules.filter(schedule => schedule.day_of_week === selectedWeekday);
+                return {
+                    ...personData,
+                    schedules: filteredSchedules
+                };
+            }).filter(personData => personData.schedules.length > 0);
+
+            let groupedData = [];
+
+            filteredData.forEach(personData => {
+                personData.schedules.forEach(schedule => {
+                    const existingGroup = groupedData.find(group =>
+                        group.day_of_week === schedule.day_of_week &&
+                        group.start_time === schedule.start_time &&
+                        group.name === schedule.name
+                    );
+
+                    if (existingGroup) {
+                        existingGroup.schedules.push(schedule);
+                    } else {
+                        groupedData.push({
+                            name: schedule.name,
+                            day_of_week: schedule.day_of_week,
+                            start_time: schedule.start_time,
+                            grade: personData.grade,
+                            schedules: [schedule]
+                        });
+                    }
+                });
+            });
+
+            const table1Data = groupedData.filter(group =>
+                ["幼未", "年少", "年中", "年長"].includes(group.grade));
+            const table2Data = groupedData.filter(group =>
+                !["幼未", "年少", "年中", "年長"].includes(group.grade));
+
+            console.log(groupedData)
+
+            displayGroupedData(table1Data, 'tbody-1');
+            displayGroupedData(table2Data, 'tbody-2');
+        }
+
+        function displayGroupedData(groupedData, tbodyId) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+
+            let rows = [[]];
+
+            groupedData.forEach(group => {
+                const startTimes = group.schedules.map(s => s.start_time);
+                const endTimes = group.schedules.map(s => s.end_time);
+                const overallStartTime = Math.min(...startTimes.map(timeToColumnIndex));
+                const overallEndTime = Math.max(...endTimes.map(timeToColumnIndex));
+
+                let placed = false;
+                for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                    let isOccupied = false;
+                    let i = overallStartTime;
+                    while (i < overallEndTime) {
+                        if (rows[rowIndex][i]) {
+                            isOccupied = true;
+                            i += rows[rowIndex][i].colSpan ? rows[rowIndex][i].colSpan : 1;
+                            continue;
+                        }
+                        i++;
+                    }
+
+                    if (!isOccupied) {
+                        placeGroupInRow(rows[rowIndex], group, overallStartTime, overallEndTime);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    let newRow = [];
+                    placeGroupInRow(newRow, group, overallStartTime, overallEndTime);
+                    rows.push(newRow);
+                }
+            });
+
+            rows.forEach((row, rowIndex) => {
+                const tr = document.createElement('tr');
+                for (let i = 0; i < row.length; i++) {
+                    if (row[i]) {
+                        if (hasSubject(row[i].textContent)) {
+                            row[i].classList.add("hasSubject");
+                        }
+                        tr.appendChild(row[i]);
+                    } else {
+                        tr.appendChild(document.createElement('td'));
+                    }
+                }
+                tbody.appendChild(tr);
+            });
+
+            rows.forEach(row => {
+                const visualRow = row.map(cell => {
+                    if (cell === undefined) return '-';
+                    if (cell === null) return 'X';
+                    return cell.textContent;
+                });
+                //console.log(visualRow.join(' | '));
+            });
+            updateHeaderCounts('tbody-1');
+            updateHeaderCounts('tbody-2');
+        }
+
+        function placeGroupInRow(row, group, startIndex, endIndex) {
+            const td = document.createElement('td');
+            td.colSpan = endIndex - startIndex;
+
+            const a = document.createElement('a');
+            a.textContent = group.name;
+            a.href = `/Update_Information/${group.name}/schedule`;
+            td.appendChild(a);
+
+            const subjectsTooltip = group.schedules.map(s => s.subject_name).join(', ');
+            td.setAttribute('title', subjectsTooltip);
+
+            for (let i = 0; i < 29; i++) {
+                if (i === startIndex) {
+                    row[i] = td;
+                    for (let j = startIndex + 1; j < endIndex; j++) {
+                        row[j] = td;
+                    }
+                    // スケジュールカウントを更新
+                    for (let j = startIndex; j < endIndex; j++) {
+                        scheduleCounts[j]++;
+                    }
+                } else if (!row[i]) {
+                    row[i] = undefined;
+                }
+            }
+            updateHeaderCounts();
+        }
+
+        function hasSubject(textContent) {
+            return textContent.trim() !== "";
+        }
+
+        function processMergedCells(tbody) {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                let skipCount = 0;
+                let deleteIndices = [];
+
+                for (let index = 0; index < row.cells.length; index++) {
+                    const cell = row.cells[index];
+                    if (skipCount > 0) {
+                        if (!cell.classList.contains('hasSubject')) {
+                            deleteIndices.push(index);
+                            skipCount--;
+                        }
+                    }
+
+                    if (cell.colSpan > 1) {
+                        skipCount += cell.colSpan - 1;
+                    }
+                }
+
+                for (let i = deleteIndices.length - 1; i >= 0; i--) {
+                    row.deleteCell(deleteIndices[i]);
+                }
+            });
+        }
+
+        function timeToColumnIndex(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            return (hours - 14) * 4 + Math.floor(minutes / 15);
+        }
+    </script>
+</body>
+
+</html>

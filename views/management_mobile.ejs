@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒一覧</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px #aaa;
+            margin-top: 50px;
+        }
+
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f2f2f2;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        input[type="text"],
+        select {
+            width: 200px;
+            padding: 10px;
+            margin: 0 10px 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        input[type="submit"] {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #555;
+        }
+
+
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+
+        .duplicate-btn {
+            background-color: #333;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .duplicate-btn:hover {
+            background-color: #555;
+        }
+
+        .update-btn {
+            color: #333;
+            text-decoration: none;
+            padding: 5px 15px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .update-btn:hover {
+            background-color: #555;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>生徒一覧</h1>
+        <a href="/top" class="button">top画面へ戻る</a>
+        <a href="/message" class="button">メッセージ送信へ</a>
+        <a href="/schedule" class="button">スケジュール確認へ</a>
+        <!-- 検索フォーム -->
+        <form action="/management" method="GET">
+            <label for="name">名前: </label>
+            <input type="text" name="name" id="name">
+            <br>
+            <label>曜日: </label>
+            <br>
+            <input type="checkbox" name="week" id="monday" value="月">
+            <label for="monday">月</label>
+            <input type="checkbox" name="week" id="tuesday" value="火">
+            <label for="tuesday">火</label>
+            <input type="checkbox" name="week" id="thursday" value="木">
+            <label for="thursday">木</label>
+            <input type="checkbox" name="week" id="friday" value="金">
+            <label for="friday">金</label>
+            <br>
+            <br>
+            <label for="grade-checkboxes">学年: </label>
+            <br>
+            <div id="grade-checkboxes" style="margin-left: 20px;">
+                <!-- チェックボックスはここに動的に挿入される想定 -->
+            </div>
+            <br>
+            <input type="submit" value="検索">
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>名前</th>
+                    <th>学年</th>
+                    <th>曜日</th>
+                    <th>開始時間</th>
+                    <th>曜日2</th>
+                    <th>開始時間2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% students.forEach(student=> { %>
+                    <tr data-student-id="<%= student.student_id %>">
+                        <td>
+                            <%= student.name %>
+                        </td>
+                        <td>
+                            <%= student.grade %>
+                        </td>
+                        <td>
+                            <%= student.week1 %>
+                        </td>
+                        <td>
+                            <%= student.time1 %>
+                        </td>
+                        <td>
+                            <%= student.week2 %>
+                        </td>
+                        <td>
+                            <%= student.time2 %>
+                        </td>
+                        <td><a href="/Update_Information/<%= student.name %>/management" class="update-btn">情報を更新</a>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
+    </div>
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // ページロード時に初期の学年オプションをセット
+            updateGradeOptions();
+
+            // 学校タイプが変更されたときにオプションを更新
+            document.getElementById('school_type').addEventListener('change', updateGradeOptions);
+
+            // 複製ボタンがクリックされたときのイベントリスナーを追加します
+            document.querySelectorAll('.duplicate-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const studentId = this.getAttribute('data-student-id');
+                    if (confirm('このデータを複製しますか？')) {
+                        duplicateData(studentId);
+                        console.log(studentId);
+                    }
+                });
+            });
+        });
+
+        function duplicateData(studentId) {
+            // データをサーバーに送信して複製を作成します
+            console.log(studentId);
+            fetch('/duplicate_student', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ studentId }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('データが複製されました!');
+                        location.reload(); // データが複製されたらページをリロード
+                    } else {
+                        alert('エラー: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('エラー:', error);
+                    alert('データの複製中にエラーが発生しました。');
+                });
+        }
+
+        function updateGradeOptions() {
+            const gradeSelect = document.getElementById('grade');
+            const selectedSchoolType = document.getElementById('school_type').value;
+
+            gradeSelect.innerHTML = '';
+
+            const initialOption = new Option('選択してください', '');
+            gradeSelect.appendChild(initialOption);
+
+            let grades = [];
+            if (["幼未", "年少", "年中", "年長"].includes(selectedSchoolType)) {
+                // 幼稚園のクラスの場合、これらのカテゴリはすでに学年を含んでいるので追加のオプションは不要です
+                grades = [];
+            } else if (selectedSchoolType === '小学') {
+                grades = ['1年生', '2年生', '3年生', '4年生', '5年生', '6年生'];
+            } else if (selectedSchoolType === '中学') {
+                grades = ['1年生', '2年生', '3年生'];
+            } else if (selectedSchoolType === '高校') {
+                grades = ['1年生', '2年生', '3年生'];
+            } else if (selectedSchoolType === '大学') {
+                grades = ['1年生', '2年生', '3年生', '4年生'];
+            }
+
+            grades.forEach(function (grade) {
+                const option = new Option(grade, grade);
+                gradeSelect.appendChild(option);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const gradesContainer = document.getElementById('grade-checkboxes');
+
+            const grades = {
+                '小学校以下': [
+                    { display: '幼未', value: '幼未' },
+                    { display: '年少', value: '年少' },
+                    { display: '年中', value: '年中' },
+                    { display: '年長', value: '年長' }
+                ],
+                '小学校': Array.from({ length: 6 }, (_, i) => ({ display: `${i + 1}年生`, value: `小学${i + 1}年生` })),
+                '中学校': Array.from({ length: 3 }, (_, i) => ({ display: `${i + 1}年生`, value: `中学${i + 1}年生` })),
+                '高校': Array.from({ length: 3 }, (_, i) => ({ display: `${i + 1}年生`, value: `高校${i + 1}年生` })),
+                // 必要に応じて他のカテゴリーを追加
+            };
+
+            Object.entries(grades).forEach(([category, categoryGrades]) => {
+                const fieldset = document.createElement('fieldset');
+                const legend = document.createElement('legend');
+                legend.textContent = category;
+                fieldset.appendChild(legend);
+
+                categoryGrades.forEach(({ display, value }) => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'grade[]';
+                    checkbox.value = value; // サーバーに送信される詳細な形式
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(display)); // ユーザーに表示される形式
+                    fieldset.appendChild(label);
+                });
+
+                gradesContainer.appendChild(fieldset);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
